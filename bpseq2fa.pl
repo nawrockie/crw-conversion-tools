@@ -32,13 +32,14 @@ my $seq  = "";
 while(my $line = <IN>) { 
   chomp $line;
   if($line =~ s/^Filename\:\s+//) {
-    $filename = $line;
     if($seq ne "") { 
-      printf(">%s:%s\n%s\n", $organism, $accn, $seq);
+      printf(">%s:%s:%s\n%s\n", $filename, $organism, $accn, $seq);
       $organism = "";
       $accn = "";
       $seq = "";
     }
+    $filename = $line;
+    $filename =~ s/\s+/\-/g;
   }
   elsif($line =~ s/^Organism\:\s+//) {
     $organism = $line;
@@ -65,7 +66,7 @@ close(IN);
 
 #output final seq
 if($seq ne "") { 
-  printf(">%s:%s\n%s\n", $organism, $accn, $seq);
+  printf(">%s:%s:%s\n%s\n", $filename, $organism, $accn, $seq);
   $organism = "";
   $accn = "";
   $seq = "";

@@ -173,7 +173,7 @@ while(($iter <= $max_iter) && (!($stabilized))) {
   if($nremoved == 0) { 
     $stabilized = 1; 
     printf("\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
-    system("cp $out_dir_root.$iter.cons.stk $out_dir_root.final.stk");
+    run_command("cp $out_dir_root.$iter.cons.stk $out_dir_root.final.stk");
     printf("\n$out_dir_root.final.stk is your seed alignment.\n\n");
     printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n\n");
   }
@@ -209,10 +209,9 @@ sub match_step {
   $system_call2print = $system_call;
   $system_call2print =~ s/^perl \S+\//perl /;
   printf("Running '$system_call2print'\n");
-  system("$system_call");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
-  system("mv $root.indi.stk $out_dir");
-  system("mv $root.sum $out_dir");
+  run_command("$system_call");
+  run_command("mv $root.indi.stk $out_dir");
+  run_command("mv $root.sum $out_dir");
   return;
 }
 
@@ -252,8 +251,7 @@ sub prefilter_step {
   $system_call2print = $system_call;
   $system_call2print =~ s/^\S+\///;
   printf("Running '$system_call2print'\n");
-  system("$system_call");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
+  run_command("$system_call");
 
   #rerun esl-alimanip many times wastefully, just to figure out how many were removed at each step
   #determine number of sequences initially 
@@ -262,21 +260,18 @@ sub prefilter_step {
   $nrm_total = $nseqs_init - determine_num_seqs_in_stk($out_stk);
 
   $system_call = "$esl_alimanip -o $fam.tmp.stk --xambig $xambig $in_stk";
-  system("$system_call");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
+  run_command("$system_call");
   $nrm_ambig = $nseqs_init - determine_num_seqs_in_stk("$fam.tmp.stk");
 
   $system_call = "$esl_alimanip -o $fam.tmp.stk --lnfract $lnfract $in_stk";
-  system("$system_call");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
+  run_command("$system_call");
   $nrm_short = $nseqs_init - determine_num_seqs_in_stk("$fam.tmp.stk");
 
   if($lxfract < 999) { 
     $system_call = "$esl_alimanip -o $fam.tmp.stk --lxfract $lxfract $in_stk";
-    system("$system_call");
-    if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
+    run_command("$system_call");
     $nrm_long = $nseqs_init - determine_num_seqs_in_stk("$fam.tmp.stk");
-    system("rm $fam.tmp.stk");
+    run_command("rm $fam.tmp.stk");
   }
   else { 
     $nrm_long = 0;
@@ -322,8 +317,7 @@ sub consensusize_step {
   $system_call2print = $system_call;
   $system_call2print =~ s/^\S+\///;
   printf("Running '$system_call2print'\n");
-  system("$system_call");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
+  run_command("$system_call");
 
   # parse esl-construct output to print --fmin value
   open(TMP, $construct_output); 
@@ -377,8 +371,7 @@ sub fastaize_step {
   $system_call2print = $system_call;
   $system_call2print =~ s/^\S+\///;
   printf("Running '$system_call2print'\n");
-  system("$system_call");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
+  run_command("$system_call");
   return;
 }
 
@@ -398,8 +391,7 @@ sub alnfastaize_step {
   my ($in_stk, $out_fa) = @_;
 
   $system_call = "$esl_reformat -o $out_fa afa $in_stk";
-  system("$system_call");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
+  run_command("$system_call");
 
   return;
 }
@@ -422,8 +414,7 @@ sub cmbuild_step {
   $system_call2print = $system_call;
   $system_call2print =~ s/^\S+\///;
   printf("Running '$system_call2print'\n");
-  system("$system_call");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
+  run_command("$system_call");
   return;
 }
 #####################################################################
@@ -445,8 +436,7 @@ sub cmalign_step {
   $system_call2print = $system_call;
   $system_call2print =~ s/^\S+\///;
   printf("Running '$system_call2print'\n");
-  system("$system_call");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
+  run_command("$system_call");
   return;
 }
 
@@ -477,23 +467,31 @@ sub rmconflicts_step {
   $system_call2print = $system_call;
   $system_call2print =~ s/^\S+\///;
   printf("Running '$system_call2print'\n");
-  system("$system_call");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
+  run_command("$system_call");
 
-  $system_call = "$esl_alimanip -o $out_stk --seq-r $out_list $in_stk";
-  $system_call2print = $system_call;
-  $system_call2print =~ s/^\S+\///;
-  printf("Running '$system_call2print'\n");
-  system("$system_call");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
-
-  #determine number of seqs removed 
-  $nremoved = 0;
-  open(IN, $out_list); 
-  while($line = <IN>) { 
-    if($line =~ m/\w/) { $nremoved++; }
+  if(-s $out_list) { # only call esl-alimanip if the out list has >= 1 sequences in it
+    $system_call = "$esl_alimanip -o $out_stk --seq-r $out_list $in_stk";
+    $system_call2print = $system_call;
+    $system_call2print =~ s/^\S+\///;
+    printf("Running '$system_call2print'\n");
+    run_command("$system_call");
+    
+    #determine number of seqs removed 
+    $nremoved = 0;
+    open(IN, $out_list); 
+    while($line = <IN>) { 
+      if($line =~ m/\w/) { $nremoved++; }
+    }
+    close(IN);
   }
-  close(IN);
+  else { 
+    $system_call = "cp $in_stk $out_stk";
+    $system_call2print = $system_call;
+    $system_call2print =~ s/^\S+\///;
+    printf("Running '$system_call2print'\n");
+    run_command("$system_call");
+    $nremoved = 0;
+  }
   return $nremoved;
 }
 
@@ -607,18 +605,14 @@ sub create_output_dir {
     }
     else { # dir exists, but -F enabled, so we remove it
       if($out_dir eq "") { printf STDERR ("ERROR, trying to create directory named \"\"\n"); exit(1); }
-      system("rm -rf $out_dir/*");
-      if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"rm -rf $out_dir/*\"\) unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
-      system("rmdir $out_dir");
-      if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"rmdir $out_dir\"\) unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
+      run_command("rm -rf $out_dir/*");
+      run_command("rmdir $out_dir");
       if(-d $out_dir) { printf STDERR ("ERROR, output directory $out_dir still exists after a system\(\"rmdir $out_dir\"\) call.\n"); exit(1); }
     }
   }
   # if we get here, either $out_dir does not yet exist, or it does but -F was set on command line
-  system("mkdir $out_dir");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"mkdir $out_dir\"\) unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
-  #system("cp $bpseq_file $out_dir\/");
-  #if(($? >> 8) != 0) { printf STDERR ("ERROR, unable to copy $cm_file to $out_dir.\n"); }
+  run_command("mkdir $out_dir");
+  #run_command("cp $bpseq_file $out_dir\/");
   return;
 }
 
@@ -638,14 +632,36 @@ sub determine_num_seqs_in_stk {
   my ($in_stk) = $_[0];
 
   $system_call = "$esl_alistat --rna --list $fam.tmp.list $in_stk > /dev/null";
-  system("$system_call");
-  if(($? >> 8) != 0) { printf STDERR ("ERROR, system\(\"$system_call\") unexpectedly returned non-zero exit status %d\n", ($? >> 8)); exit($? >> 8); } 
+  run_command("$system_call");
   my $nseqs = 0; 
   open(IN, "$fam.tmp.list"); 
   while($line = <IN>) { 
     $nseqs++; 
   } 
   close(IN);
-  system("rm $fam.tmp.list");
+  run_command("rm $fam.tmp.list");
   return $nseqs;
+}
+
+
+#####################################################################
+# subroutine: run_command
+# incept:     EPN, Tue Jan 24 09:51:51 2017
+# 
+# purpose:    Run a command using 'system' and die if it fails.
+#
+# returns:    Nothing
+# 
+####################################################################
+sub run_command {
+  $narg_expected = 1;
+  if(scalar(@_) != $narg_expected) { printf STDERR ("ERROR, run_command() entered with %d != %d input arguments.\n", scalar(@_), $narg_expected); exit(1); } 
+  my ($cmd) = $_[0];
+  system($cmd);
+
+  if($? != 0) {
+    die "ERROR in run_command, the following command failed:\n$cmd\n";
+  }
+
+  return;
 }
